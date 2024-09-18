@@ -1,6 +1,8 @@
-import { ArrowLeft } from "@/src/components/icons/arrow-left";
-import { Notifications } from "@/src/components/icons/notifications";
 import Image from "next/image";
+
+import { PaymentButtons } from "@/app/components/payment-buttons";
+import { ArrowLeft } from "@/app/components/icons/arrow-left";
+import { Notifications } from "@/app/components/icons/notifications";
 
 export default function Home() {
   return (
@@ -18,8 +20,11 @@ export default function Home() {
           </div>
         </header>
 
-        <div className="w-full flex flex-col items-center text-center">
-          <div>
+        <div
+          className="w-full flex flex-col items-center justify-center
+          min-h-[50svh] text-center"
+        >
+          <div className="mb-4">
             <Image
               src="/qr-code.png"
               alt="Escanear QR code de pagamento"
@@ -30,15 +35,12 @@ export default function Home() {
             />
           </div>
 
-          <div className="my-3 mx-auto">
-            <h2>Scan to make payment</h2>
+          <div className="mb-8 mx-auto">
+            <h2 className="text-gray-300">Scan to make payment</h2>
             <div className="text-4xl font-medium">R$ 101</div>
           </div>
 
-          <div className="flex flex-col">
-            <button>Simulate payment through PIX</button>
-            <button>Simulate payment through Stripe</button>
-          </div>
+          <PaymentButtons />
         </div>
       </div>
     </main>
