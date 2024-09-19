@@ -67,6 +67,8 @@ export function TransactionControl() {
           break;
         default:
           setStatus("");
+          setIsProcessing(false);
+          eventSource.close();
           break;
       }
     };
