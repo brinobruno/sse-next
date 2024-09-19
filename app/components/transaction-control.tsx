@@ -69,7 +69,7 @@ export function TransactionControl() {
           <button
             key={id}
             className={`${bg} text-background rounded-full font-medium py-2 px-4
-            disabled:brightness-50`}
+            disabled:brightness-50 disabled:opacity-50`}
             onClick={() =>
               handleTransaction({ type: id, amount: 101, success })
             }
