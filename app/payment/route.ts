@@ -1,4 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
+import { PAYMENT_STATUSES } from "../utils/payment-statuses";
 
 export const runtime = "edge";
 export const dynamic = "force-dynamic";
@@ -6,42 +7,70 @@ export const dynamic = "force-dynamic";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function GET(req: NextApiRequest, res: NextApiResponse) {
   const { searchParams } = new URL(req.url as string);
-  const type = searchParams.get("type");
+  const type = searchParams.get("type") || null;
   const amount = parseFloat(searchParams.get("amount") || "0");
+  const success = searchParams.get("success") === "true";
 
-  if (!type || amount < 0) return console.log("invalid transaction");
-
+  if (!type || amount < 0) {
+    return new Response(JSON.stringify({ error: "invalid transaction" }), {
+      status: 400,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+  }
   const responseStream = new TransformStream();
   const writer = responseStream.writable.getWriter();
   const encoder = new TextEncoder();
   let closed = false;
 
-  const sendStatus = (status: string) => {
+  function sendStatus(status: string) {
     writer.write(
       encoder.encode(`data: ${JSON.stringify({ status, type, amount })}\n\n`)
     );
-  };
+  }
 
   // Payment gateway simulation
-  const processTransaction = async () => {
-    sendStatus("pending");
+  async function processTransaction() {
+    sendStatus(PAYMENT_STATUSES.PENDING);
 
-    setTimeout(() => {
-      if (!closed) {
-        sendStatus("in_transit");
-      }
-    }, 3000);
+    function simulateSuccess() {
+      setTimeout(() => {
+        if (!closed) {
+          sendStatus(PAYMENT_STATUSES.IN_TRANSIT);
+        }
+      }, 3000);
 
-    setTimeout(() => {
-      if (!closed) {
-        sendStatus("paid");
+      setTimeout(() => {
+        if (!closed) {
+          sendStatus(PAYMENT_STATUSES.PAID);
 
-        // Close the stream and mark closed to prevent further writes
-        writer.close();
-        closed = true;
-      }
-    }, 6000);
-  };
+          // Close the stream and mark closed to prevent further writes
+          writer.close();
+          closed = true;
+        }
+      }, 6000);
+    }
+
+    function simulateFailure() {
+      setTimeout(() => {
+        if (!closed) {
+          sendStatus(PAYMENT_STATUSES.CANCELED);
+
+          // Close the stream and mark closed to prevent further writes
+          writer.close();
+          closed = true;
+        }
+      }, 3000);
+    }
+
+    if (success === false) {
+      simulateFailure();
+      return;
+    }
+
+    simulateSuccess();
+  }
 
   await processTransaction();
 
