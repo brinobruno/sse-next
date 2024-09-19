@@ -44,20 +44,30 @@ export function TransactionControl() {
 
     eventSource.onmessage = (e) => {
       const data = JSON.parse(e.data);
+      const { status } = data;
+
       console.log(data);
 
-      if (data.status === PAYMENT_STATUSES.PENDING) {
-        setStatus("Payment is in progress...");
-      } else if (data.status === PAYMENT_STATUSES.IN_TRANSIT) {
-        setStatus("Payment is in transit...");
-      } else if (data.status === PAYMENT_STATUSES.PAID) {
-        setIsProcessing(false);
-        setStatus("Payment completed!");
-        eventSource.close();
-      } else if (data.status === PAYMENT_STATUSES.CANCELED) {
-        setIsProcessing(false);
-        setStatus("Payment failed!");
-        eventSource.close();
+      switch (status) {
+        case PAYMENT_STATUSES.PENDING:
+          setStatus("Payment is in progress...");
+          break;
+        case PAYMENT_STATUSES.IN_TRANSIT:
+          setStatus("Payment is in transit...");
+          break;
+        case PAYMENT_STATUSES.PAID:
+          setIsProcessing(false);
+          setStatus("Payment completed!");
+          eventSource.close();
+          break;
+        case PAYMENT_STATUSES.CANCELED:
+          setIsProcessing(false);
+          setStatus("Payment failed!");
+          eventSource.close();
+          break;
+        default:
+          setStatus("");
+          break;
       }
     };
   }
