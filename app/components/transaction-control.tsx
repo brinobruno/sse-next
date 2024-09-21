@@ -30,6 +30,8 @@ type transaction = {
   success: boolean;
 };
 
+const DOMAIN_URL = process.env.NEXT_PUBLIC_DOMAIN_URL;
+
 export function TransactionControl() {
   const [status, setStatus] = useState<string>("");
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
@@ -39,7 +41,7 @@ export function TransactionControl() {
     setStatus("Payment is in progress...");
 
     const eventSource = new EventSource(
-      `http://localhost:3000/payment?type=${type}&amount=${amount}&success=${success}`
+      `${DOMAIN_URL}/payment?type=${type}&amount=${amount}&success=${success}`
     );
 
     eventSource.onmessage = (e) => {
